@@ -5,9 +5,9 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'                 " Vundle, the plug-in manager for Vim
-
 Plugin 'mileszs/ack.vim'
 Plugin 'lyokha/vim-xkbswitch'
+Plugin 'klen/python-mode'
 " Plugin 'myusuf3/numbers.vim'
 " Plugin 'porqz/KeyboardLayoutSwitcher'
 Plugin 'SirVer/ultisnips'                     " Ultisnips
@@ -174,7 +174,7 @@ set noswapfile
 set tabstop=4
 set shiftwidth=4
 " set smarttab
-set expandtab
+" set expandtab
 
 " set background=dark
 set t_Co=256
@@ -189,7 +189,7 @@ set guifont=Meslo\ LG\ S\ Regular\ for\ Powerline:h20
 let g:user_emmet_mode='a'    "enable all function in all mode.
 let g:user_emmet_install_global = 0
 let g:user_emmet_leader_key = '<C-e>'
-" let g:user_emmet_expandabbr_key = '<C-e><C-e>'
+let g:user_emmet_expandabbr_key = '<C-e><C-e>'
 autocmd FileType html,css EmmetInstall
 
 " Stop Q from taking us into ex mode - I don't think I ever needed this
@@ -245,11 +245,9 @@ let g:easytags_async = 1
 " autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 " autocmd FileType ruby setlocal omnifunc=rubycomplete#CompleteTags
 
-function SwitchBuffer()
-    b#
-  endfunction
 
   nmap <leader>b :call SwitchBuffer()<CR>
+
 
 let g:vim_markdown_folding_disabled = 1
 
@@ -264,14 +262,28 @@ let g:syntastic_php_phpcs_exec='~/.composer/vendor/bin/phpcs'
 let g:syntastic_php_phpcs_args='--standard=PSR2 -n'
 
 
-" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-let g:UltiSnipsExpandTrigger="<c-space>"
-let g:UltiSnipsJumpForwardTrigger="<c-j>"
-let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-let g:UltiSnipsListSnippets = "<f2>"
-" If you want :UltiSnipsEdit to split your window.
-let g:UltiSnipsEditSplit="vertical"
+function! g:UltiSnips_Complete()
+    call UltiSnips#ExpandSnippet()
+    if g:ulti_expand_res == 0
+        if pumvisible()
+            return "\<C-n>"
+        else
+            call UltiSnips#JumpForwards()
+            if g:ulti_jump_forwards_res == 0
+               return "\<TAB>"
+            endif
+        endif
+    endif
+    return ""
+endfunction
 
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsListSnippets="<c-e>"
+" this mapping Enter key to <C-y> to chose the current highlight item
+" and close the selection list, same as other IDEs.
+" CONFLICT with some plugins like tpope/Endwise
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 nmap <F8> :TagbarToggle<CR>
 nnoremap <F5> :UndotreeToggle<cr>
 
